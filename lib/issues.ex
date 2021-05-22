@@ -11,8 +11,15 @@ defmodule Issues do
       iex> Issues.hello()
       :world
 
+      iex> Issues.goodbye()
+      :world
+
   """
   def hello do
     :world
+  end
+
+  def goodbye do 
+    :world 
   end
 end
