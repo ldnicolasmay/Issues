@@ -1,6 +1,9 @@
 defmodule Issues.CLI do
 
+  import Enum, only: [sort: 2, take: 2, reverse: 1]
+  import Issues.GithubIssues, only: [fetch: 2]
   import Issues.TableFormatter, only: [print_table_for_columns: 2]
+  import OptionParser, only: [parse: 2]
 
   @default_count 4
 
@@ -19,13 +22,15 @@ defmodule Issues.CLI do
   @doc """
   `argv` can be -h or --help, with returns :help.
 
-  Otherwise it is a github user name, project name, and (optionally) the number of entries to format
+  Otherwise it is a github user name, project name, and (optionally) the number
+  of entries to format
 
   Return a tuple of `{user, project, count}`, or `:help` if help was given.
   """
 
   def parse_args(argv) do
-    OptionParser.parse(argv, switches: [help: :boolean], aliases: [h: :help])
+    argv
+    |> parse(switches: [help: :boolean], aliases: [h: :help])
     |> elem(1)
     |> args_to_internal_representation()
   end
@@ -52,7 +57,7 @@ defmodule Issues.CLI do
   end
 
   def process({user, project, count}) do
-    Issues.GithubIssues.fetch(user, project)
+    fetch(user, project)
     |> decode_response()
     |> sort_into_descending_order()
     |> last(count)
@@ -68,13 +73,13 @@ defmodule Issues.CLI do
 
   def sort_into_descending_order(issues_list) do
     issues_list
-    |> Enum.sort(fn i1, i2 -> i1["created_at"] >= i2["created_at"] end)
+    |> sort(fn i1, i2 -> i1["created_at"] >= i2["created_at"] end)
   end
 
   def last(issues_list, count) do
     issues_list
-    |> Enum.take(count)
-    |> Enum.reverse()
+    |> take(count)
+    |> reverse()
   end
 end
 
